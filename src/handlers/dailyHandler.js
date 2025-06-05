@@ -39,14 +39,18 @@ export const daily = async () => {
 async function postYesterdayResults(channel, record) {
   await app.client.chat.postMessage({
     channel,
-    text: `The answer for yesterday's question is: *${record.options[record.correctAnswerIndex]}*`,
+    text: 'Yesterdays answer:',
+  });
+  await app.client.chat.postMessage({
+    channel,
+    text: `*${record.correctAnswerIndex + 1}) ${record.options[record.correctAnswerIndex]}*`,
   });
   await app.client.chat.postMessage({ channel, text: `_${record.explanation}_` });
   for (const userId in record.answers) {
     const correct = record.answers[userId];
     await app.client.chat.postMessage({
       channel,
-      text: `<@${userId}> answered: ${correct ? '🟢' : '🔴'}`,
+      text: `<@${userId}> ${correct ? '🟢' : '🔴'}`,
     });
   }
   await app.client.chat.postMessage({ channel, text: '----------------------------' });

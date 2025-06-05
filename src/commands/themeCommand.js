@@ -7,7 +7,7 @@ export function registerThemeCommand() {
     const theme = command.text.trim();
     if (!theme) {
       try {
-        const current = await getTheme('C08V66J0Q03');
+        const current = await getTheme();
         if (current) {
           await respond(`Current theme is: *${current}*`);
         } else {
@@ -21,7 +21,7 @@ export function registerThemeCommand() {
     }
 
     try {
-      await setTheme('C08V66J0Q03', theme);
+      await setTheme(theme);
       await say(`New theme: *${theme}*, set by <@${command.user_id}>`);
     } catch (err) {
       console.error('DynamoDB write failed', err);

@@ -10,7 +10,7 @@ import {
 const DEFAULT_THEME = 'cats';
 
 export const daily = async () => {
-  const channel = 'C08V66J0Q03'; // todo maybe not hardcode this
+  const channel = process.env.SLACK_CHANNEL_ID;
   const dateKey = new Date().toISOString().split('T')[0];
   const yesterdayKey = new Date(Date.now() - 86400000)
     .toISOString()

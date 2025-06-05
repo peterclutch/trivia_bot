@@ -2,10 +2,9 @@ import { app } from '../services/slackApp.js';
 import { getWeeklyScores } from '../services/trivia.js';
 
 export const weekly = async () => {
-  const channel = 'C08V66J0Q03';
+  const channel = process.env.SLACK_CHANNEL_ID;
   const today = new Date();
-  const scores = await getWeeklyScores(today);
-  const entries = Object.entries(scores);
+  const entries = await getWeeklyScores(today);
   if (entries.length === 0) {
     await app.client.chat.postMessage({
       channel,
@@ -14,17 +13,24 @@ export const weekly = async () => {
     return { statusCode: 200, body: 'OK' };
   }
 
-  entries.sort((a, b) => b[1] - a[1]);
-  const best = entries[0][1];
-  const winners = entries.filter(([, s]) => s === best).map(([u]) => `<@${u}>`);
+  // Sort by score descending
+  entries.sort((a, b) => b[1].score - a[1].score);
 
-  await app.client.chat.postMessage({ channel, text: '*Weekly Trivia Results*' });
-  for (const [userId, score] of entries) {
+  const bestScore = entries[0][1].score;
+  const winners = entries
+      .filter(([, data]) => data.score === bestScore)
+      .map(([userId]) => `<@${userId}>`);
+
+  // Announce weekly results
+  await app.client.chat.postMessage({ channel, text: '*Weekly results*' });
+
+  for (const [userId, data] of entries) {
     await app.client.chat.postMessage({
       channel,
-      text: `<@${userId}>: ${score}`,
+      text: `<@${userId}>: ${data.score}/${data.attempts} attempts`,
     });
   }
+
   await app.client.chat.postMessage({
     channel,
     text: `:trophy: Winner${winners.length > 1 ? 's' : ''}: ${winners.join(', ')}`,

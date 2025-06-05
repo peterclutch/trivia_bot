@@ -2,8 +2,8 @@ import { app } from '../services/slackApp.js';
 import { openai } from '../services/openAI.js';
 import { zodTextFormat } from 'openai/helpers/zod';
 import { TriviaEvent } from '../utils/validation.js';
-import {ddbDoc} from "../services/dynamodb.js";
-import {GetCommand} from "@aws-sdk/lib-dynamodb";
+import { ddbDoc } from '../services/dynamodb.js';
+import { GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 
 export const daily = async () => {
   const channel = 'C08V66J0Q03'; // todo maybe not hardcode this
@@ -30,6 +30,16 @@ export const daily = async () => {
     },
   });
   const trivia = TriviaEvent.parse(JSON.parse(response.output_text));
+  const dateKey = new Date().toISOString().split('T')[0];
+  await ddbDoc.send(
+    new PutCommand({
+      TableName: process.env.TABLE_NAME,
+      Item: {
+        pk: `question:${dateKey}`,
+        ...trivia,
+      },
+    })
+  );
   try {
     await app.client.chat.postMessage({ channel, text: `Here is your daily trivia question for *${new Date().toISOString().split('T')[0]}*:` });
     await app.client.chat.postMessage({ channel, text: `*Which of the following statements about ${trivia.theme.toLowerCase()} is NOT true?*` });

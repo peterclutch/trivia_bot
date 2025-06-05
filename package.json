@@ -4,7 +4,7 @@
   "description": "",
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
   "scripts": {},
   "devDependencies": {
@@ -16,6 +16,8 @@
     "@aws-sdk/client-dynamodb": "^3.823.0",
     "@aws-sdk/lib-dynamodb": "^3.823.0",
     "@slack/bolt": "^4.4.0",
-    "dotenv": "^16.5.0"
+    "dotenv": "^16.5.0",
+    "openai": "^5.1.0",
+    "zod": "^3.25.51"
   }
 }

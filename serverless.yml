@@ -24,7 +24,8 @@ functions:
           path: slack/events
           method: post
   daily:
-    handler: app.post
+    handler: app.daily
+    timeout: 30
     events:
       - schedule:
           method: scheduler

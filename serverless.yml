@@ -1,0 +1,48 @@
+org: unihelper
+service: serverless-bolt-js
+provider:
+  name: aws
+  runtime: nodejs22.x
+  environment:
+    SLACK_SIGNING_SECRET: ${env:SLACK_SIGNING_SECRET}
+    SLACK_BOT_TOKEN: ${env:SLACK_BOT_TOKEN}
+    TABLE_NAME: ${env:TABLE_NAME}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+          Resource:
+            - arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${env:TABLE_NAME}
+functions:
+  slack:
+    handler: app.handler
+    events:
+      - http:
+          path: slack/events
+          method: post
+  daily:
+    handler: app.post
+    events:
+      - schedule:
+          method: scheduler
+          rate:
+            - cron(0 0/4 ? * MON-FRI *) # todo 08:00 every day monday to friday
+          timezone: Europe/Copenhagen
+resources:
+  Resources:
+    MyTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${env:TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+plugins:
+  - serverless-offline

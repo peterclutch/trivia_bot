@@ -1,0 +1,9 @@
+
+node_modules/
+.serverless
+.env
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr

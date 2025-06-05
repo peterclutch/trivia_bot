@@ -9,10 +9,10 @@ export function registerThemeCommand() {
     if (!theme) {
       try {
         const res = await ddbDoc.send(
-          new GetCommand({
-            TableName: process.env.TABLE_NAME,
-            Key: { pk: 'C08V66J0Q03' },
-          })
+            new GetCommand({
+              TableName: process.env.TABLE_NAME,
+              Key: { pk: 'C08V66J0Q03' },
+            })
         );
 
         if (res.Item) {
@@ -31,15 +31,15 @@ export function registerThemeCommand() {
 
     try {
       await ddbDoc.send(
-        new PutCommand({
-          TableName: process.env.TABLE_NAME,
-          Item: item,
-        })
+          new PutCommand({
+            TableName: process.env.TABLE_NAME,
+            Item: item,
+          })
       );
       await say(`New theme: *${theme}*, set by <@${command.user_id}>`);
     } catch (err) {
       console.error('DynamoDB write failed', err);
-      await respond("Sorry, I couldn't save that theme. Please try again later.");
+      await respond("Oops, something went wrong.");
     }
   });
 }

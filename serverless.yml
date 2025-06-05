@@ -18,13 +18,13 @@ provider:
             - arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${env:TABLE_NAME}
 functions:
   slack:
-    handler: app.handler
+    handler: src/handlers/slackHandler.handler
     events:
       - http:
           path: slack/events
           method: post
   daily:
-    handler: app.daily
+    handler: src/handlers/dailyHandler.daily
     timeout: 30
     events:
       - schedule:

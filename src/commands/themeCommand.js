@@ -1,6 +1,5 @@
 import { app } from '../services/slackApp.js';
-import { ddbDoc } from '../services/dynamodb.js';
-import { GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { getTheme, setTheme } from '../services/trivia.js';
 
 export function registerThemeCommand() {
   app.command('/theme', async ({ command, ack, respond, say }) => {
@@ -8,15 +7,9 @@ export function registerThemeCommand() {
     const theme = command.text.trim();
     if (!theme) {
       try {
-        const res = await ddbDoc.send(
-            new GetCommand({
-              TableName: process.env.TABLE_NAME,
-              Key: { pk: 'C08V66J0Q03' },
-            })
-        );
-
-        if (res.Item) {
-          await respond(`Current theme is: *${res.Item.theme}*`);
+        const current = await getTheme('C08V66J0Q03');
+        if (current) {
+          await respond(`Current theme is: *${current}*`);
         } else {
           await respond('No theme has been set yet.');
         }
@@ -27,15 +20,8 @@ export function registerThemeCommand() {
       return;
     }
 
-    const item = { pk: 'C08V66J0Q03', theme, updatedAt: new Date().toISOString() };
-
     try {
-      await ddbDoc.send(
-          new PutCommand({
-            TableName: process.env.TABLE_NAME,
-            Item: item,
-          })
-      );
+      await setTheme('C08V66J0Q03', theme);
       await say(`New theme: *${theme}*, set by <@${command.user_id}>`);
     } catch (err) {
       console.error('DynamoDB write failed', err);

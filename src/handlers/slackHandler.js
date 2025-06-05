@@ -1,8 +1,8 @@
 import { awsLambdaReceiver } from '../services/slackApp.js';
-import { registerFalseCommand } from '../commands/falseCommand.js';
+import { registerLieCommand } from '../commands/lieCommand.js';
 import { registerThemeCommand } from '../commands/themeCommand.js';
 
-registerFalseCommand();
+registerLieCommand();
 registerThemeCommand();
 
 export const handler = async (event, context, callback) => {

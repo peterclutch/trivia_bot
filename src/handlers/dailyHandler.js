@@ -72,6 +72,6 @@ async function postTriviaQuestion(channel, trivia, theme) {
   await app.client.chat.postMessage({ channel, text: `*3)* ${trivia.options[2]}` });
   await app.client.chat.postMessage({
     channel,
-    text: '_Type /false 1, 2 or 3 into the channel to submit (you can only submit your answer once)_',
+    text: '_Type /lie 1, 2 or 3 into the channel to submit (you can only submit your answer once)_',
   });
 }

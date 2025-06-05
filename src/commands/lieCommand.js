@@ -1,8 +1,8 @@
 import { app } from '../services/slackApp.js';
 import { getQuestion, recordAnswer } from '../services/trivia.js';
 
-export function registerFalseCommand() {
-  app.command('/false', async ({ command, ack, respond, say }) => {
+export function registerLieCommand() {
+  app.command('/lie', async ({ command, ack, respond, say }) => {
     await ack();
     const input = command.text.trim();
     if (!['1', '2', '3'].includes(input)) {

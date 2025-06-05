@@ -11,7 +11,7 @@ export function registerThemeCommand() {
         const res = await ddbDoc.send(
           new GetCommand({
             TableName: process.env.TABLE_NAME,
-            Key: { pk: command.team_id },
+            Key: { pk: 'C08V66J0Q03' },
           })
         );
 
@@ -27,7 +27,7 @@ export function registerThemeCommand() {
       return;
     }
 
-    const item = { pk: command.team_id, theme, updatedAt: new Date().toISOString() };
+    const item = { pk: 'C08V66J0Q03', theme, updatedAt: new Date().toISOString() };
 
     try {
       await ddbDoc.send(

@@ -33,6 +33,14 @@ functions:
           rate:
             - cron(0 0/4 ? * MON-FRI *) # todo 08:00 every day monday to friday
           timezone: Europe/Copenhagen
+  weekly:
+    handler: src/handlers/weeklyHandler.weekly
+    events:
+      - schedule:
+          method: scheduler
+          rate:
+            - cron(0 9 ? * SAT *)
+          timezone: Europe/Copenhagen
 resources:
   Resources:
     MyTable:

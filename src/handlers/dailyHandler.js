@@ -24,7 +24,7 @@ export const daily = async () => {
   const res = await ddbDoc.send(
     new GetCommand({
       TableName: process.env.TABLE_NAME,
-      Key: { pk: channel },
+      Key: { pk: 'theme' },
     }),
   );
   const theme = res.Item ? res.Item.theme : DEFAULT_THEME;

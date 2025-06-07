@@ -5,3 +5,5 @@ export const TriviaEvent = z.object({
   correctAnswerIndex: z.number(),
   explanation: z.string(),
 });
+
+export const TriviaWeek = z.array(TriviaEvent).length(5);

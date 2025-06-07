@@ -1,9 +1,17 @@
 import { app } from '../services/slackApp.js';
-import { getWeeklyScores } from '../services/trivia.js';
+import { getWeeklyScores, getQuestion } from '../services/trivia.js';
+import { postYesterdayResults } from './dailyHandler.js';
 
 export const weekly = async () => {
   const channel = process.env.SLACK_CHANNEL_ID;
   const today = new Date();
+  const yesterdayKey = new Date(today.getTime() - 86400000)
+    .toISOString()
+    .split('T')[0];
+  const yesterdayRecord = await getQuestion(yesterdayKey);
+  if (yesterdayRecord) {
+    await postYesterdayResults(channel, yesterdayRecord);
+  }
   const entries = await getWeeklyScores(today);
   if (entries.length === 0) {
     await app.client.chat.postMessage({

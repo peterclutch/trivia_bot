@@ -3,16 +3,19 @@ import { ddbDoc } from '../services/dynamodb.js';
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
 import {
   generateQuestion,
+  generateWeekQuestions,
   getQuestion,
   storeQuestion,
+  weekStart,
 } from '../services/trivia.js';
 
 const DEFAULT_THEME = 'cats';
 
 export const daily = async () => {
   const channel = process.env.SLACK_CHANNEL_ID;
-  const dateKey = new Date().toISOString().split('T')[0];
-  const yesterdayKey = new Date(Date.now() - 86400000)
+  const today = new Date();
+  const dateKey = today.toISOString().split('T')[0];
+  const yesterdayKey = new Date(today.getTime() - 86400000)
     .toISOString()
     .split('T')[0];
 
@@ -29,14 +32,21 @@ export const daily = async () => {
   );
   const theme = res.Item ? res.Item.theme : DEFAULT_THEME;
 
-  const trivia = await generateQuestion(theme);
-  await storeQuestion(dateKey, trivia, theme);
+  if (today.getDay() === 1) { // Monday
+    await prepareWeeklyQuestions(today, theme);
+  }
 
-  await postTriviaQuestion(channel, trivia, theme);
+  let trivia = await getQuestion(dateKey);
+  if (!trivia) {
+    trivia = await generateQuestion(theme);
+    await storeQuestion(dateKey, trivia, theme);
+  }
+
+  await postTriviaQuestion(channel, trivia, trivia.theme);
   return { statusCode: 200, body: 'OK' };
 };
 
-async function postYesterdayResults(channel, record) {
+export async function postYesterdayResults(channel, record) {
   await app.client.chat.postMessage({
     channel,
     text: 'Yesterdays answer:',
@@ -56,7 +66,7 @@ async function postYesterdayResults(channel, record) {
   await app.client.chat.postMessage({ channel, text: '----------------------------' });
 }
 
-async function postTriviaQuestion(channel, trivia, theme) {
+export async function postTriviaQuestion(channel, trivia, theme) {
   await app.client.chat.postMessage({
     channel,
     text: `Here is your daily trivia question for *${new Date()
@@ -74,4 +84,18 @@ async function postTriviaQuestion(channel, trivia, theme) {
     channel,
     text: '_Type /lie 1, 2 or 3 into the channel to submit (you can only submit your answer once)_',
   });
+}
+
+async function prepareWeeklyQuestions(today, theme) {
+  const mondayKey = weekStart(today);
+  const exists = await getQuestion(mondayKey);
+  if (exists) return;
+  const questions = await generateWeekQuestions(theme);
+  const monday = new Date(mondayKey);
+  for (let i = 0; i < questions.length; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const key = d.toISOString().split('T')[0];
+    await storeQuestion(key, questions[i], theme);
+  }
 }

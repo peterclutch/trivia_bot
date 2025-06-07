@@ -1,10 +1,10 @@
 import { ddbDoc } from './dynamodb.js';
 import { openai } from './openAI.js';
 import { zodTextFormat } from 'openai/helpers/zod';
-import { TriviaEvent } from '../utils/validation.js';
+import { TriviaEvent, TriviaWeek } from '../utils/validation.js';
 import { GetCommand, PutCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 
-function weekStart(dateInput) {
+export function weekStart(dateInput) {
     const d = new Date(dateInput);
     const day = d.getDay();
     const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
@@ -96,6 +96,24 @@ export async function generateQuestion(theme) {
         },
     });
     return TriviaEvent.parse(JSON.parse(response.output_text));
+}
+
+export async function generateWeekQuestions(theme) {
+    const response = await openai.responses.parse({
+        model: 'gpt-4.1',
+        temperature: 1,
+        input: [
+            { role: 'system', content: 'You are a trivia master creating questions for the game: Two Truths and a Lie. Do not make the answers too obvious, and ensure the correct answer has a random placement among the options.' },
+            {
+                role: 'user',
+                content: `Generate five trivia questions about ${theme}. Return them as an array of objects. Each question must have exactly two true statements and one lie with an explanation. Avoid repeating facts across questions.`,
+            },
+        ],
+        text: {
+            format: zodTextFormat(TriviaWeek, 'event'),
+        },
+    });
+    return TriviaWeek.parse(JSON.parse(response.output_text));
 }
 
 export async function getTheme() {

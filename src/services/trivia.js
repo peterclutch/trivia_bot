@@ -48,7 +48,7 @@ export async function recordAnswer(dateKey, userId, isCorrect) {
             },
         }));
 
-    const weekKey = weekStart(dateKey);
+    const weekKey = weekStart();
     if (isCorrect) {
         await ddbDoc.send(
             new UpdateCommand({
@@ -98,8 +98,8 @@ export async function generateWeekQuestions(theme) {
     return TriviaWeek.parse(JSON.parse(response.output_text));
 }
 
-export async function getWeeklyScores(dateInput) {
-    const weekKey = weekStart(dateInput);
+export async function getWeeklyScores() {
+    const weekKey = weekStart();
     const [scoreRes, attemptRes] = await Promise.all([
         ddbDoc.send(
             new GetCommand({

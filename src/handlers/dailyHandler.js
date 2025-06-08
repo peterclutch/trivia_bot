@@ -78,7 +78,7 @@ export async function postTriviaQuestion() {
 }
 
 export async function prepareWeeklyQuestions() {
-  const theme = getTheme();
+  const theme = await getTheme();
   const mondayKey = weekStart();
   const questions = await generateWeekQuestions(theme);
   const monday = new Date(mondayKey);
@@ -98,15 +98,7 @@ export async function prepareWeeklyQuestions() {
 
 export async function postWeeklyResults() {
   const channel = process.env.SLACK_CHANNEL_ID;
-  const today = new Date();
-  const yesterdayKey = new Date(today.getTime() - 86400000)
-      .toISOString()
-      .split('T')[0];
-  const yesterdayRecord = await getQuestion(yesterdayKey);
-  if (yesterdayRecord) {
-    await postYesterdayResults(channel, yesterdayRecord);
-  }
-  const entries = await getWeeklyScores(today);
+  const entries = await getWeeklyScores();
   if (entries.length === 0) {
     await app.client.chat.postMessage({
       channel,

@@ -31,15 +31,7 @@ functions:
       - schedule:
           method: scheduler
           rate:
-            - cron(0 8 ? * MON-FRI *)
-          timezone: Europe/Copenhagen
-  weekly:
-    handler: src/handlers/weeklyHandler.weekly
-    events:
-      - schedule:
-          method: scheduler
-          rate:
-            - cron(0 8 ? * SAT *)
+            - cron(0 9 ? * MON-SAT *)
           timezone: Europe/Copenhagen
 resources:
   Resources:

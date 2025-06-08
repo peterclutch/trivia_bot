@@ -1,13 +1,13 @@
 import { ddbDoc } from './dynamodb.js';
 import { openai } from './openAI.js';
 import { zodTextFormat } from 'openai/helpers/zod';
-import { TriviaEvent, TriviaWeek } from '../utils/validation.js';
+import { TriviaWeek } from '../utils/validation.js';
 import { GetCommand, PutCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 
-export function weekStart(dateInput) {
-    const d = new Date(dateInput);
+export function weekStart() {
+    const d = new Date();
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(d);
     monday.setDate(diff);
     return monday.toISOString().split('T')[0];
@@ -80,24 +80,6 @@ export async function recordAnswer(dateKey, userId, isCorrect) {
 
 }
 
-export async function generateQuestion(theme) {
-    const response = await openai.responses.parse({
-        model: 'gpt-4.1',
-        temperature: 1,
-        input: [
-            { role: 'system', content: 'You are a trivia master creating questions for the game: Two Truths and a Lie. Do not make the answers too obvious, and ensure the correct answer has a random placement among the options.' },
-            {
-                role: 'user',
-                content: `Generate a trivia question about ${theme}. Return exactly two true statements and a lie (and explain why). While keeping the facts factual, avoid using the same facts that were used on previous prompts.`,
-            },
-        ],
-        text: {
-            format: zodTextFormat(TriviaEvent, 'event'),
-        },
-    });
-    return TriviaEvent.parse(JSON.parse(response.output_text));
-}
-
 export async function generateWeekQuestions(theme) {
     const response = await openai.responses.parse({
         model: 'gpt-4.1',
@@ -116,25 +98,6 @@ export async function generateWeekQuestions(theme) {
     return TriviaWeek.parse(JSON.parse(response.output_text));
 }
 
-export async function getTheme() {
-    const res = await ddbDoc.send(new GetCommand({
-        TableName: process.env.TABLE_NAME,
-        Key: { pk: 'theme' },
-    }));
-    return res.Item ? res.Item.theme : null;
-}
-
-export async function setTheme(theme) {
-    await ddbDoc.send(new PutCommand({
-        TableName: process.env.TABLE_NAME,
-        Item: {
-            pk: 'theme',
-            theme,
-            updatedAt: new Date().toISOString(),
-        },
-    }));
-}
-
 export async function getWeeklyScores(dateInput) {
     const weekKey = weekStart(dateInput);
     const [scoreRes, attemptRes] = await Promise.all([
@@ -151,13 +114,10 @@ export async function getWeeklyScores(dateInput) {
             })
         ),
     ]);
-
     if (!attemptRes.Item) return {};
-
     const scoresMap = scoreRes.Item ?? {};
-    // remove pk from vallues
+    // remove pk from values
     const { pk, ...attemptsMap } = attemptRes.Item;
-
     const allUserIds = Object.keys(attemptsMap);
     const resultEntries = [];
     for (const userId of allUserIds) {

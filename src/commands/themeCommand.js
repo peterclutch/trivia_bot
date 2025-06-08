@@ -1,5 +1,5 @@
 import { app } from '../services/slackApp.js';
-import { getTheme, setTheme } from '../services/trivia.js';
+import { getTheme, setTheme } from '../services/theme.js';
 
 export function registerThemeCommand() {
   app.command('/theme', async ({ command, ack, respond, say }) => {

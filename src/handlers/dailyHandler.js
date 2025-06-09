@@ -92,7 +92,7 @@ export async function prepareWeeklyQuestions() {
   const channel = process.env.SLACK_CHANNEL_ID;
   await app.client.chat.postMessage({
     channel,
-    text: `A new week of trivia starts now. The theme is <*${theme}*>!`,
+    text: `A new week of trivia starts now. The theme is *${theme}*!`,
   });
 }
 

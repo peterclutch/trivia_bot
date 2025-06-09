@@ -95,7 +95,7 @@ export async function generateWeekQuestions(theme) {
             format: zodTextFormat(TriviaWeek, 'event'),
         },
     });
-    return TriviaWeek.parse(JSON.parse(response.output_text));
+    return TriviaWeek.parse(JSON.parse(response.output_text)).questions;
 }
 
 export async function getWeeklyScores() {

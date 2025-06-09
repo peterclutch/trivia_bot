@@ -6,4 +6,6 @@ export const TriviaEvent = z.object({
   explanation: z.string(),
 });
 
-export const TriviaWeek = z.array(TriviaEvent).length(5);
+export const TriviaWeek = z.object({
+  questions: z.array(TriviaEvent).length(5)
+});

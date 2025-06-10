@@ -35,45 +35,40 @@ export async function postYesterdayResults() {
   if (!yesterdayQuestion) {
     return;
   }
-  await app.client.chat.postMessage({
-    channel: process.env.SLACK_CHANNEL_ID,
-    text: 'Yesterdays answer:',
-  });
-  await app.client.chat.postMessage({
-    channel: process.env.SLACK_CHANNEL_ID,
-    text: `*${yesterdayQuestion.correctAnswerIndex + 1}) ${yesterdayQuestion.options[yesterdayQuestion.correctAnswerIndex]}*`,
-  });
-  await app.client.chat.postMessage({ channel: process.env.SLACK_CHANNEL_ID, text: `_${yesterdayQuestion.explanation}_` });
+  const lines = [
+    'Yesterdays answer:',
+    `*${yesterdayQuestion.correctAnswerIndex + 1}) ${yesterdayQuestion.options[yesterdayQuestion.correctAnswerIndex]}*`,
+    `_${yesterdayQuestion.explanation}_`,
+  ];
   for (const userId in yesterdayQuestion.answers) {
     const correct = yesterdayQuestion.answers[userId];
-    await app.client.chat.postMessage({
-      channel: process.env.SLACK_CHANNEL_ID,
-      text: `<@${userId}> ${correct ? '🟢' : '🔴'}`,
-    });
+    lines.push(`<@${userId}> ${correct ? '🟢' : '🔴'}`);
   }
-  await app.client.chat.postMessage({ channel: process.env.SLACK_CHANNEL_ID, text: '----------------------------' });
+  lines.push('----------------------------');
+  await app.client.chat.postMessage({
+    channel: process.env.SLACK_CHANNEL_ID,
+    text: lines.join('\n'),
+  });
 }
 
 export async function postTriviaQuestion() {
   const dateKey = new Date().toISOString().split('T')[0];
   let trivia = await getQuestion(dateKey);
 
-  await app.client.chat.postMessage({
-    channel: process.env.SLACK_CHANNEL_ID,
-    text: `Here is your daily trivia question for *${new Date()
+  const lines = [
+    `Here is your daily trivia question for *${new Date()
         .toISOString()
         .split('T')[0]}*:`,
-  });
+    `*Which of the following statements about ${trivia.theme.toLowerCase()} is NOT true?*`,
+    `*1)* ${trivia.options[0]}`,
+    `*2)* ${trivia.options[1]}`,
+    `*3)* ${trivia.options[2]}`,
+    '_Type /lie 1, 2 or 3 into the channel to submit (you can only submit your answer once)_',
+  ];
+
   await app.client.chat.postMessage({
     channel: process.env.SLACK_CHANNEL_ID,
-    text: `*Which of the following statements about ${trivia.theme.toLowerCase()} is NOT true?*`,
-  });
-  await app.client.chat.postMessage({ channel: process.env.SLACK_CHANNEL_ID, text: `*1)* ${trivia.options[0]}` });
-  await app.client.chat.postMessage({ channel: process.env.SLACK_CHANNEL_ID, text: `*2)* ${trivia.options[1]}` });
-  await app.client.chat.postMessage({ channel: process.env.SLACK_CHANNEL_ID, text: `*3)* ${trivia.options[2]}` });
-  await app.client.chat.postMessage({
-    channel: process.env.SLACK_CHANNEL_ID,
-    text: '_Type /lie 1, 2 or 3 into the channel to submit (you can only submit your answer once)_',
+    text: lines.join('\n'),
   });
 }
 
@@ -115,19 +110,17 @@ export async function postWeeklyResults() {
       .filter(([, data]) => data.score === bestScore)
       .map(([userId]) => `<@${userId}>`);
 
-  // Announce weekly results
-  await app.client.chat.postMessage({ channel, text: '*Weekly results*' });
+  const lines = ['*Weekly results*'];
 
   for (const [userId, data] of entries) {
-    await app.client.chat.postMessage({
-      channel,
-      text: `<@${userId}>: ${data.score}/${data.attempts} attempts`,
-    });
+    lines.push(`<@${userId}>: ${data.score}/${data.attempts} attempts`);
   }
+
+  lines.push(`:trophy: Winner${winners.length > 1 ? 's' : ''}: ${winners.join(', ')}`);
+  lines.push('----------------------');
 
   await app.client.chat.postMessage({
     channel,
-    text: `:trophy: Winner${winners.length > 1 ? 's' : ''}: ${winners.join(', ')}`,
+    text: lines.join('\n'),
   });
-  await app.client.chat.postMessage({ channel, text: '----------------------' });
 }

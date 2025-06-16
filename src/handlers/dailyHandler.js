@@ -26,29 +26,41 @@ export const daily = async () => {
   return { statusCode: 200, body: 'OK' };
 };
 
+async function postResults(dateKey, heading) {
+  const question = await getQuestion(dateKey);
+  if (!question) {
+    return;
+  }
+
+  const lines = [
+    heading,
+    `*${question.correctAnswerIndex + 1}) ${question.options[question.correctAnswerIndex]}*`,
+    `_${question.explanation}_`,
+  ];
+
+  for (const userId in question.answers) {
+    const correct = question.answers[userId];
+    lines.push(`<@${userId}> ${correct ? '🟢' : '🔴'}`);
+  }
+  lines.push('----------------------------');
+
+  await app.client.chat.postMessage({
+    channel: process.env.SLACK_CHANNEL_ID,
+    text: lines.join('\n'),
+  });
+}
+
 export async function postYesterdayResults() {
   const today = new Date();
   const yesterdayKey = new Date(today.getTime() - 86400000)
       .toISOString()
       .split('T')[0];
-  const yesterdayQuestion = await getQuestion(yesterdayKey);
-  if (!yesterdayQuestion) {
-    return;
-  }
-  const lines = [
-    'Yesterdays answer:',
-    `*${yesterdayQuestion.correctAnswerIndex + 1}) ${yesterdayQuestion.options[yesterdayQuestion.correctAnswerIndex]}*`,
-    `_${yesterdayQuestion.explanation}_`,
-  ];
-  for (const userId in yesterdayQuestion.answers) {
-    const correct = yesterdayQuestion.answers[userId];
-    lines.push(`<@${userId}> ${correct ? '🟢' : '🔴'}`);
-  }
-  lines.push('----------------------------');
-  await app.client.chat.postMessage({
-    channel: process.env.SLACK_CHANNEL_ID,
-    text: lines.join('\n'),
-  });
+  await postResults(yesterdayKey, "Yesterdays answer:");
+}
+
+export async function postTodaysResults() {
+  const todayKey = new Date().toISOString().split('T')[0];
+  await postResults(todayKey, "Today's answer:");
 }
 
 export async function postTriviaQuestion() {

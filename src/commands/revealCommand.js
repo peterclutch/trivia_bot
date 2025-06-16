@@ -6,7 +6,6 @@ export function registerRevealCommand() {
     await ack();
     try {
       await postTodaysResults();
-      await respond("Revealing today's answer to the channel...");
     } catch (err) {
       console.error('Reveal command failed', err);
       await respond("Sorry, I couldn't reveal the answer.");

@@ -83,12 +83,25 @@ export async function recordAnswer(dateKey, userId, isCorrect) {
 export async function generateWeekQuestions(theme) {
     const response = await openai.responses.parse({
         model: 'gpt-4.1',
-        temperature: 1,
+        temperature: 0.7,
         input: [
-            { role: 'system', content: 'You are a trivia master creating questions for the game: Two Truths and a Lie. Do not make the answers too obvious, and ensure the correct answer has a random placement among the options.' },
+            { role: 'system', content: `
+You are a trivia master for a weekly “Two Truths and a Lie” game.
+
+Write five items on the given theme. For each item:
+- Provide exactly 3 options: two truths and one plausible lie (no obvious giveaways like absolutes or jokes).
+- Keep option lengths roughly similar.
+- Avoid repeated facts or near-duplicates across the five items; cover distinct subtopics.
+- Prefer evergreen facts.
+- Provide a short explanation (≤60 words) that explicitly identifies the lie and briefly supports the truths.
+
+Also ensure:
+- The last two items should be very challenging.
+- Set correctAnswerIndex to the **index of the lie** (0–2).
+             `},
             {
                 role: 'user',
-                content: `Generate five trivia questions about ${theme}. Return them as an array of objects. Each question must have exactly two true statements and one lie with an explanation. Avoid repeating facts across questions.`,
+                content: `Theme: ${theme}`,
             },
         ],
         text: {

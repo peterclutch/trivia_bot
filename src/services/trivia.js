@@ -146,31 +146,3 @@ export async function getWeeklyScores() {
     }
     return resultEntries;
 }
-
-export async function recordWeeklyWinners(weekKey, winners, theme) {
-    await ddbDoc.send(
-        new UpdateCommand({
-            TableName: process.env.TABLE_NAME,
-            Key: { pk: 'winners' },
-            UpdateExpression: 'SET #w.#wk = :val',
-            ExpressionAttributeNames: {
-                '#w': 'weeks',
-                '#wk': weekKey,
-            },
-            ExpressionAttributeValues: {
-                ':val': { winners, theme },
-            },
-        })
-    );
-}
-
-export async function getWinnersHistory() {
-    const res = await ddbDoc.send(
-        new GetCommand({
-            TableName: process.env.TABLE_NAME,
-            Key: { pk: 'winners' },
-        })
-    );
-    return res.Item ? res.Item.weeks || {} : {};
-}
-

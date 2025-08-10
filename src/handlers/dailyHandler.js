@@ -1,11 +1,9 @@
 import { app } from '../services/slackApp.js';
 import {
   generateWeekQuestions,
-  getQuestion,
-  getWeeklyScores,
+  getQuestion, getWeeklyScores,
   storeQuestion,
   weekStart,
-  recordWeeklyWinners,
 } from '../services/trivia.js';
 import {getTheme} from "../services/theme.js";
 
@@ -120,14 +118,9 @@ export async function postWeeklyResults() {
   entries.sort((a, b) => b[1].score - a[1].score);
 
   const bestScore = entries[0][1].score;
-  const winnerEntries = entries.filter(([, data]) => data.score === bestScore);
-  const winners = winnerEntries.map(([userId]) => `<@${userId}>`);
-
-  const weekKey = weekStart();
-  const mondayQuestion = await getQuestion(weekKey);
-  const theme = mondayQuestion?.theme;
-  const winnerIds = winnerEntries.map(([userId]) => userId);
-  await recordWeeklyWinners(weekKey, winnerIds, theme);
+  const winners = entries
+      .filter(([, data]) => data.score === bestScore)
+      .map(([userId]) => `<@${userId}>`);
 
   const lines = ['*Weekly results*'];
 
